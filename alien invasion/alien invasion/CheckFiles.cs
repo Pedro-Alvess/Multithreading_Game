@@ -16,7 +16,7 @@ namespace alien_invasion
             string CurrentPath = AppDomain.CurrentDomain.BaseDirectory;
             AssetPath = Path.Combine(CurrentPath.Remove(CurrentPath.Length - 11), "Assets");
 
-            string[] requiredAssets = { "Bullet.png", "Player.png", "alienQueennn.png", "alienMediummm.png", "alienBasic.png" };
+            string[] requiredAssets = { "enemySimpleBullet.png","Bullet.png", "Player.png", "alienQueennn.png", "alienMediummm.png", "alienBasic.png" };
 
             bool allAssetsExist = true;
 

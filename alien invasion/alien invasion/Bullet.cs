@@ -6,47 +6,33 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.AxHost;
 
 namespace alien_invasion
 {
-    internal class Bullet
+    internal abstract class Bullet
     {
         private PictureBox _bullet;
-        private int _speed = 5;
-
-        public Bullet(int startX, int startY, string assetsPath)
-        {
-            _bullet = new PictureBox();
-            _bullet.Width = 15;
-            _bullet.Height = 16;
-            _bullet.Image = Image.FromFile(Path.Combine(assetsPath, "Bullet.png"));
-            _bullet.BackColor = Color.Transparent;
-            _bullet.Left = startX - (_bullet.Width / 2);
-            _bullet.Top = startY;
-            Fase_1.ActiveForm.Controls.Add(_bullet);
-            _bullet.BringToFront();
-        }
-
-        public void Move()
-        {
-            if (_bullet.InvokeRequired)
-            {
-                _bullet.Invoke(new MethodInvoker(Move));
-            }
-            else
-            {
-                _bullet.Top -= _speed;
-            }
-        }
-
-        public bool IsOutOfBounds()
-        {
-            return _bullet.Top + _bullet.Height < 0;
-        }
-
+        public abstract void Move();
+        public abstract bool IsOutOfBounds();
         public PictureBox GetPictureBox()
         {
             return _bullet;
+        }
+
+        public PictureBox creatBullet(int width, int height, string assetsPath, string assetsName, int startX, int startY)
+        {
+            PictureBox obj = new PictureBox();
+            obj.Width = 15;
+            obj.Height = 16;
+            obj.Image = Image.FromFile(Path.Combine(assetsPath, "Bullet.png"));
+            obj.BackColor = Color.Transparent;
+            obj.Left = startX;
+            obj.Top = startY;
+            Fase_1.ActiveForm.Controls.Add(obj);
+            obj.BringToFront();
+
+            return obj;
         }
     }
 }

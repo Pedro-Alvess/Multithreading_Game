@@ -8,9 +8,9 @@ namespace alien_invasion
 {
     internal class BulletEventArgs:EventArgs
     {
-        public Bullet Bullet { get;}
+        public PlayerBullet Bullet { get;}
 
-        public BulletEventArgs(Bullet bullet)
+        public BulletEventArgs(PlayerBullet bullet)
         {
             Bullet = bullet;
         }

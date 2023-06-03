@@ -18,7 +18,9 @@ namespace alien_invasion
 
         private PictureBox _player;
         private int _speed = 5;
-        private List<Bullet> _bullets = new List<Bullet>();
+        private bool _leftBoundary = false;
+        private bool _rightBoundary = false;
+        private List<PlayerBullet> _bullets = new List<PlayerBullet>();
 
         private string _assetPath;
 
@@ -51,22 +53,46 @@ namespace alien_invasion
 
         public void MoveLeft()
         {
-            _player.Left -= _speed;
+            if (_player.Left - _speed <= -7)
+            {
+                _leftBoundary = true;
+            }
+            else
+            {
+                _leftBoundary = false;
+            }
+
+            if (!_leftBoundary)
+            {
+                _player.Left -= _speed;
+            }
+            
         }
 
         public void MoveRight()
         {
-            _player.Left += _speed;
+            if(_player.Left + _speed >= 700)
+            {
+                _rightBoundary = true;
+            }
+            else
+            {
+                _rightBoundary = false;
+            }
+            if (!_rightBoundary)
+            {
+                _player.Left += _speed;
+            }
         }
         public void ShootRight()
         {
-            Bullet bullet = new Bullet(_player.Left + (_player.Width / 2) - 31, _player.Top, _assetPath);
+            PlayerBullet bullet = new PlayerBullet(_player.Left + (_player.Width / 2) - 31, _player.Top, _assetPath);
             _bullets.Add(bullet);
             BulletCreated?.Invoke(this, new BulletEventArgs(bullet));
         }
         public void ShootLeft()
         {
-            Bullet bullet = new Bullet(_player.Left + (_player.Width / 2) + 31, _player.Top, _assetPath);
+            PlayerBullet bullet = new PlayerBullet(_player.Left + (_player.Width / 2) + 31, _player.Top, _assetPath);
             _bullets.Add(bullet);
             BulletCreated?.Invoke(this, new BulletEventArgs(bullet));
         }

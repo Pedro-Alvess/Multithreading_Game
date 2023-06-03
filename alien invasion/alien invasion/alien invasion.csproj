@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bullet.cs" />
+    <Compile Include="PlayerBullet.cs" />
     <Compile Include="BulletEventArgs.cs" />
     <Compile Include="CheckFiles.cs" />
     <Compile Include="Form1.cs">
