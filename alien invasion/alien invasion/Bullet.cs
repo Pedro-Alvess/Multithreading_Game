@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,16 +14,17 @@ namespace alien_invasion
         private PictureBox _bullet;
         private int _speed = 5;
 
-        public Bullet(int startX, int startY)
+        public Bullet(int startX, int startY, string assetsPath)
         {
             _bullet = new PictureBox();
             _bullet.Width = 15;
             _bullet.Height = 16;
-            _bullet.Image = Image.FromFile("C:\\Users\\pepeh\\OneDrive\\Documentos\\GitHub\\Multithreading_Game\\alien invasion\\alien invasion\\Assets\\Bullet.png");
+            _bullet.Image = Image.FromFile(Path.Combine(assetsPath, "Bullet.png"));
             _bullet.BackColor = Color.Transparent;
             _bullet.Left = startX - (_bullet.Width / 2);
             _bullet.Top = startY;
-            //Fase_1.ActiveForm.Controls.Add(_bullet);
+            Fase_1.ActiveForm.Controls.Add(_bullet);
+            _bullet.BringToFront();
         }
 
         public void Move()
@@ -33,7 +35,7 @@ namespace alien_invasion
             }
             else
             {
-                _bullet.Top += _speed;
+                _bullet.Top -= _speed;
             }
         }
 

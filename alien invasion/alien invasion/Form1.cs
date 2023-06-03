@@ -9,6 +9,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
+using System.Diagnostics;
+using System.IO;
 
 namespace alien_invasion
 {
@@ -16,17 +18,24 @@ namespace alien_invasion
     {
         private bool gameOver = false;
         private PlayerMechanics _player;
+        private Stopwatch stopwatch = new Stopwatch();
+        public string AssetPath;
+        private bool _shootSide = false;
 
         public Fase_1()
         {
             //Verifica a integridade dos arquivos;
-            //new CheckFiles().CheckAssets();
+            AssetPath = new CheckFiles().CheckAssets();
 
             InitializeComponent();
-            this.TransparencyKey = Color.MidnightBlue;
-            _player = new PlayerMechanics(Player);
-            _player.BulletCreated += Player_BulletCreated;
+            //this.TransparencyKey = Color.MidnightBlue;
+            _player = new PlayerMechanics(AssetPath);
 
+            // Criar o player só após o forms ter iniciado;
+            Load += (sender, e) => _player.CreatPlayer(this, e);
+
+            //Adiciona um manipulador de eventos
+            _player.BulletCreated += Player_BulletCreated;
             Task.Run(() => PlayerUpdate());
 
             //Garante que o a vareavel gameOver vai ser sincada na thread do Player quando fechar a janela.
@@ -41,19 +50,20 @@ namespace alien_invasion
 
         private void PlayerUpdate()
         {
-            while(!gameOver)
+            while (!gameOver)
             {
+                //IsShoot();
                 MovePlayer();
                 _player.Update();
-                Thread.Sleep(16);
+                Thread.Sleep(1);
             }
         }
 
         private void MovePlayer()
         {
-            if(IsDisposed) return;
+            if (IsDisposed) return;
 
-            if(InvokeRequired)
+            if (InvokeRequired)
             {
                 BeginInvoke((MethodInvoker)MovePlayer);
                 return;
@@ -71,14 +81,25 @@ namespace alien_invasion
             {
                 _player.MoveRight();
             }
-            else if(IsKeyDown(Keys.Right))
+            else if (IsKeyDown(Keys.Right))
             {
                 _player.MoveRight();
             }
-
-            if (IsKeyDown(Keys.Space))
+            if (IsKeyDown(Keys.Space) && (stopwatch.ElapsedMilliseconds >= 200 || !stopwatch.IsRunning))
             {
-                _player.Shoot();
+                stopwatch.Restart();
+                stopwatch.Start();
+                if (_shootSide)
+                {
+                    _player.ShootRight();
+                    _shootSide = false;
+                }
+                else
+                {
+                    _player.ShootLeft();
+                    _shootSide = true;
+                }
+                
             }
         }
         private void Player_BulletCreated(object sender, BulletEventArgs e)
