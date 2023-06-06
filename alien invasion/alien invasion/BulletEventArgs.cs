@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace alien_invasion
 {
-    internal class BulletEventArgs:EventArgs
+    internal class BulletEventArgs<T>:EventArgs
     {
-        public PlayerBullet Bullet { get;}
+        public T Bullet { get;}
 
-        public BulletEventArgs(PlayerBullet bullet)
+        public BulletEventArgs(T bullet)
         {
             Bullet = bullet;
         }

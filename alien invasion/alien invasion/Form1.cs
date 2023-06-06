@@ -16,10 +16,10 @@ namespace alien_invasion
 {
     public partial class Fase_1 : Form
     {
-        private bool gameOver = false;
+        public bool gameOver = false;
         private PlayerMechanics _player;
         private Stopwatch stopwatch = new Stopwatch();
-        public string AssetPath;
+        public static string AssetPath;
         private bool _shootSide = false;
 
         public Fase_1()
@@ -29,13 +29,13 @@ namespace alien_invasion
 
             InitializeComponent();
             //this.TransparencyKey = Color.MidnightBlue;
-            _player = new PlayerMechanics(AssetPath);
+            _player = new PlayerMechanics();
 
             // Criar o player só após o forms ter iniciado;
             Load += (sender, e) => _player.CreatPlayer(this, e);
 
             //Adiciona um manipulador de eventos
-            _player.BulletCreated += Player_BulletCreated;
+            _player.bulletCreated += Player_BulletCreated;
             Task.Run(() => PlayerUpdate());
 
             //Garante que o a vareavel gameOver vai ser sincada na thread do Player quando fechar a janela.
@@ -55,6 +55,7 @@ namespace alien_invasion
                 //IsShoot();
                 MovePlayer();
                 _player.Update();
+                gameOver = _player.alive;
                 Thread.Sleep(1);
             }
         }
@@ -102,7 +103,7 @@ namespace alien_invasion
                 
             }
         }
-        private void Player_BulletCreated(object sender, BulletEventArgs e)
+        private void Player_BulletCreated(object sender, BulletEventArgs<PlayerBullet> e)
         {
             PictureBox bulletEvent = e.Bullet.GetPictureBox();
             Controls.Add(bulletEvent);

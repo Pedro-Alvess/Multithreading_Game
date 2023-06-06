@@ -12,20 +12,16 @@ namespace alien_invasion
 {
     internal abstract class Bullet
     {
-        private PictureBox _bullet;
+        private static string _assetsPath = Fase_1.AssetPath;
         public abstract void Move();
         public abstract bool IsOutOfBounds();
-        public PictureBox GetPictureBox()
-        {
-            return _bullet;
-        }
 
-        public PictureBox creatBullet(int width, int height, string assetsPath, string assetsName, int startX, int startY)
+        public PictureBox creatBullet(int width, int height, string assetsName, int startX, int startY)
         {
             PictureBox obj = new PictureBox();
             obj.Width = 15;
             obj.Height = 16;
-            obj.Image = Image.FromFile(Path.Combine(assetsPath, "Bullet.png"));
+            obj.Image = Image.FromFile(Path.Combine(_assetsPath, "Bullet.png"));
             obj.BackColor = Color.Transparent;
             obj.Left = startX;
             obj.Top = startY;
