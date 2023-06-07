@@ -21,6 +21,7 @@ namespace alien_invasion
         private Stopwatch stopwatch = new Stopwatch();
         public static string AssetPath;
         private bool _shootSide = false;
+        private List<SimpleEnemy> _enemies = new List<SimpleEnemy>();
 
         public Fase_1()
         {
@@ -33,6 +34,14 @@ namespace alien_invasion
 
             // Criar o player só após o forms ter iniciado;
             Load += (sender, e) => _player.CreatPlayer(this, e);
+
+            //Cria thread dos inimigos
+            Task threadSimpleEnemy = Task.Run(() => CreatSimpleEnemy());
+            Task threadMediunEnemy = Task.Run(() => CreatMediumEnemy());
+            Task threadQueenEnemy = Task.Run(() => CreatQueenEnemy());
+
+            //Só executa o update dos inimigos quando todos os assets já tiverem sido instanciados.
+            Task.WhenAll(threadSimpleEnemy, threadMediunEnemy, threadQueenEnemy).ContinueWith(t => UpdateEnemies());
 
             //Adiciona um manipulador de eventos
             _player.bulletCreated += Player_BulletCreated;
@@ -109,12 +118,56 @@ namespace alien_invasion
             Controls.Add(bulletEvent);
         }
 
+
+        // Verifica quando uma tecla é pressionada
+        [DllImport("user32.dll")]
+        private static extern short GetKeyState(int key);
         private bool IsKeyDown(Keys key)
         {
             return (GetKeyState((int)key) & 0x8000) != 0;
         }
 
-        [DllImport("user32.dll")]
-        private static extern short GetKeyState(int key);
+        //Criação dos inimigos
+        private void CreatSimpleEnemy()
+        {
+            //Primeira fila de inimigos
+            for (int i = 50; i <= 610; i += 70)
+            {
+                Point position = new Point(i, 260);
+                SimpleEnemy _sEnemy = new SimpleEnemy(this, EventArgs.Empty, position);
+                _enemies.Add(_sEnemy);
+            }
+            //Segunda fila de inimigos
+            for (int i = 95; i <= 725; i += 70)
+            {
+                Point position = new Point(i, 190);
+                SimpleEnemy _sEnemy = new SimpleEnemy(this, EventArgs.Empty, position);
+                _enemies.Add(_sEnemy);
+            }
+
+        }
+        private void CreatMediumEnemy()
+        {
+            //Bota codigo aqui....
+        }
+        private void CreatQueenEnemy()
+        {
+            //Bota codigo aqui....
+        }
+        private void UpdateEnemies()
+        {
+            while (!gameOver)
+            {
+                Task.Delay(100).Wait();
+                Task.Run( () =>
+                {
+                    foreach (SimpleEnemy e in _enemies)
+                    {
+                        e.StartEnemy();
+                        e.Update();
+                    }
+                });
+            }
+        }
     }
 }

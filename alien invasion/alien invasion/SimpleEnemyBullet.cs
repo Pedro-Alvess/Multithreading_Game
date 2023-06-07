@@ -10,7 +10,7 @@ namespace alien_invasion
     internal class SimpleEnemyBullet: Bullet
     {
         private PictureBox _bullet;
-        private int _speed = 3;
+        private int _speed = 7;
 
         public SimpleEnemyBullet(int startX, int startY)
         {

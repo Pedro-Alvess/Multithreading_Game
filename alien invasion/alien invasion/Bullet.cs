@@ -21,12 +21,17 @@ namespace alien_invasion
             PictureBox obj = new PictureBox();
             obj.Width = 15;
             obj.Height = 16;
-            obj.Image = Image.FromFile(Path.Combine(_assetsPath, "Bullet.png"));
+            obj.Image = Image.FromFile(Path.Combine(_assetsPath, assetsName));
             obj.BackColor = Color.Transparent;
             obj.Left = startX;
             obj.Top = startY;
-            Fase_1.ActiveForm.Controls.Add(obj);
-            obj.BringToFront();
+
+            Fase_1.ActiveForm.Invoke((MethodInvoker)(() =>
+            {
+                Fase_1.ActiveForm.Controls.Add(obj);
+                obj.BringToFront();
+            }));
+
 
             return obj;
         }

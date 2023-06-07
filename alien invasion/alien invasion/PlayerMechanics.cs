@@ -99,8 +99,20 @@ namespace alien_invasion
                 {
                     _bullets[i].Move();
                 }
-
-                _bullets.RemoveAll(b => b.IsOutOfBounds());
+                _bullets.RemoveAll(b =>
+                {
+                    bool isOutOfBounds = b.IsOutOfBounds();
+                    if (isOutOfBounds)
+                    {
+                        // Remover o objeto da interface do usuário
+                        Fase_1.ActiveForm.Invoke((MethodInvoker)(() =>
+                        {
+                            Fase_1.ActiveForm.Controls.Remove(b.GetPictureBox());
+                            b.GetPictureBox().Dispose();
+                        }));
+                    }
+                    return isOutOfBounds;
+                });
             }// Fim do bloco de sincronização
         }
     }
