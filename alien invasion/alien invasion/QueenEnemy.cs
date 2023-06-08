@@ -4,13 +4,12 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace alien_invasion
 {
-    internal class SimpleEnemy
+    internal class QueenEnemy
     {
         private static string _assetPath = Fase_1.AssetPath;
 
@@ -20,22 +19,22 @@ namespace alien_invasion
         private static Random random = new Random();
 
         private object _locker = new { };
-        private EventHandler<BulletEventArgs<SimpleEnemyBullet>> _bulletCreated;
-        private List<SimpleEnemyBullet> _bullets = new List<SimpleEnemyBullet>();
+        private EventHandler<BulletEventArgs<QueenEnemyBullet>> _bulletCreated;
+        private List<QueenEnemyBullet> _bullets = new List<QueenEnemyBullet>();
 
         private bool _isMovingRight;
         private int _speed = 5;
 
-        public SimpleEnemy(object sender, EventArgs e, Point position)
+        public QueenEnemy(object sender, EventArgs e, Point position)
         {
             Fase_1 form = (Fase_1)sender;
 
             _enemy = new PictureBox();
-            _enemy.Width = 40;
-            _enemy.Height = 35;
+            _enemy.Width = 60;
+            _enemy.Height = 55;
             _enemy.SizeMode = PictureBoxSizeMode.CenterImage;
             _enemy.BackColor = Color.Transparent;
-            _enemy.Image = Image.FromFile(Path.Combine(_assetPath, "alienBasic.png"));
+            _enemy.Image = Image.FromFile(Path.Combine(_assetPath, "alienQueennn.png"));
 
             _enemy.Left = position.X;
             _enemy.Top = position.Y;
@@ -46,7 +45,6 @@ namespace alien_invasion
                 form.Controls.Add(_enemy);
                 _enemy.BringToFront();
             }));
-
         }
         public void EnemyMovement()
         {
@@ -59,8 +57,8 @@ namespace alien_invasion
                 _isMovingRight = !_isMovingRight;
             }
             else if (random.Next(0, 100) < 10) // 5% de chance dele inverter o movimento
-            { 
-                _isMovingRight = !_isMovingRight; 
+            {
+                _isMovingRight = !_isMovingRight;
             }
 
             //Como os asstes estão na thread principal, só é possivel atualizar a possição na thread form.
@@ -76,11 +74,11 @@ namespace alien_invasion
 
 
             //Tiro aleatório para baixo
-            if (random.Next(0, 100) < 1) //1% de chance de atirar
+            if (random.Next(0, 100) < 1) //5% de chance de atirar
             {
-                SimpleEnemyBullet bullet = new SimpleEnemyBullet(_enemy.Left + (_enemy.Width / 2), _enemy.Top + _enemy.Height);
+                QueenEnemyBullet bullet = new QueenEnemyBullet(_enemy.Left + (_enemy.Width / 2), _enemy.Top + _enemy.Height);
                 _bullets.Add(bullet);
-                _bulletCreated?.Invoke(this, new BulletEventArgs<SimpleEnemyBullet>(bullet));
+                _bulletCreated?.Invoke(this, new BulletEventArgs<QueenEnemyBullet>(bullet));
             }
 
         }
@@ -108,6 +106,7 @@ namespace alien_invasion
                 }); // Usa uma função Lambda para remover as bullets
             }
         }
+
 
     }
 }
