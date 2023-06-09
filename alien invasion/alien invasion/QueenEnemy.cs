@@ -38,7 +38,7 @@ namespace alien_invasion
             _enemy.Height = 55;
             _enemy.SizeMode = PictureBoxSizeMode.CenterImage;
             _enemy.BackColor = Color.Transparent;
-            _enemy.Image = Image.FromFile(Path.Combine(_assetPath, "alienQueennn.png"));
+            _enemy.Image = Image.FromFile(Path.Combine(_assetPath, "alienQueen.png"));
 
             _enemy.Left = position.X;
             _enemy.Top = position.Y;

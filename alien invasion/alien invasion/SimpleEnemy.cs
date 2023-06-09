@@ -95,7 +95,7 @@ namespace alien_invasion
             
 
             //Tiro aleatório para baixo
-            if (random.Next(0, 100) < 1) //1% de chance de atirar
+            if (random.Next(0, 100) < 2) //2% de chance de atirar
             {
                 SimpleEnemyBullet bullet = new SimpleEnemyBullet(_enemy.Left + (_enemy.Width / 2), _enemy.Top + _enemy.Height);
                 _bullets.Add(bullet);

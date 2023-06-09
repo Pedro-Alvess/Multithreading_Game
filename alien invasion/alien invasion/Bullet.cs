@@ -19,9 +19,10 @@ namespace alien_invasion
         public PictureBox creatBullet(int width, int height, string assetsName, int startX, int startY)
         {
             PictureBox obj = new PictureBox();
-            obj.Width = 15;
-            obj.Height = 16;
+            obj.Width = width;
+            obj.Height = height;
             obj.Image = Image.FromFile(Path.Combine(_assetsPath, assetsName));
+            obj.SizeMode = PictureBoxSizeMode.CenterImage;
             obj.BackColor = Color.Transparent;
             obj.Left = startX;
             obj.Top = startY;

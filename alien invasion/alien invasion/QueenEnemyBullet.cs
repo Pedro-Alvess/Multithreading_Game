@@ -14,7 +14,7 @@ namespace alien_invasion
 
         public QueenEnemyBullet(int startX, int startY)
         {
-            _bullet = base.creatBullet(13, 13, "enemySimpleBullet.png", startX, startY);
+            _bullet = base.creatBullet(21, 30, "enemyQueenBullet.png", startX, startY);
         }
 
         public override void Move()
