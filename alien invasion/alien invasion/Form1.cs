@@ -20,10 +20,18 @@ namespace alien_invasion
         private PlayerMechanics _player;
         private Stopwatch stopwatch = new Stopwatch();
         public static string AssetPath;
+
         private bool _shootSide = false;
+        private int _timeBetweenShot = 450;
+
         private List<SimpleEnemy> _SimpleEnemies = new List<SimpleEnemy>();
+        private List<Point> _positionSEnemies = new List<Point>();
+
         private List<MediumEnemy> _MediumEnemies = new List<MediumEnemy>();
+        private List<Point> _positionMEnmies = new List<Point>();
+
         private List<QueenEnemy> _QueenEnemies = new List<QueenEnemy>();
+        private List<Point> _positionQEnmies = new List<Point>();
 
         public Fase_1()
         {
@@ -61,14 +69,27 @@ namespace alien_invasion
 
         private void PlayerUpdate()
         {
-            while (!gameOver)
+            Task.Run(() => 
             {
-                //IsShoot();
-                MovePlayer();
-                _player.Update();
-                gameOver = _player.alive;
-                Thread.Sleep(1);
-            }
+                while (!gameOver)
+                {
+                    _player.Update();
+
+                    gameOver = _player.alive;
+                    Thread.Sleep(16);
+                }
+            });
+
+            Task.Run(() => 
+            {
+                while (!gameOver)
+                {
+                    gameOver = _player.alive;
+                    MovePlayer();
+                    Thread.Sleep(16);
+                }
+            });
+
         }
 
         private void MovePlayer()
@@ -97,7 +118,7 @@ namespace alien_invasion
             {
                 _player.MoveRight();
             }
-            if (IsKeyDown(Keys.Space) && (stopwatch.ElapsedMilliseconds >= 200 || !stopwatch.IsRunning))
+            if (IsKeyDown(Keys.Space) && (stopwatch.ElapsedMilliseconds >= _timeBetweenShot || !stopwatch.IsRunning))
             {
                 stopwatch.Restart();
                 stopwatch.Start();
@@ -138,6 +159,7 @@ namespace alien_invasion
                 Point position = new Point(i, 260);
                 SimpleEnemy _enemy = new SimpleEnemy(this, EventArgs.Empty, position);
                 _SimpleEnemies.Add(_enemy);
+                _positionSEnemies.Add(position);
             }
             //Segunda fila de inimigos
             for (int i = 95; i <= 725; i += 70)
@@ -145,6 +167,7 @@ namespace alien_invasion
                 Point position = new Point(i, 190);
                 SimpleEnemy _enemy = new SimpleEnemy(this, EventArgs.Empty, position);
                 _SimpleEnemies.Add(_enemy);
+                _positionSEnemies.Add(position);
             }
 
         }
@@ -155,6 +178,7 @@ namespace alien_invasion
                 Point position = new Point(i, 120);
                 MediumEnemy _enemy = new MediumEnemy(this, EventArgs.Empty, position);
                 _MediumEnemies.Add(_enemy);
+                _positionMEnmies.Add(position);
             }
         }
         private void CreatQueenEnemy()
@@ -164,6 +188,7 @@ namespace alien_invasion
                 Point position = new Point(i, 40);
                 QueenEnemy _enemy = new QueenEnemy(this, EventArgs.Empty, position);
                 _QueenEnemies.Add(_enemy);
+                _positionQEnmies.Add(position);
             }
         }
         private void UpdateEnemies()
@@ -175,7 +200,7 @@ namespace alien_invasion
                 {
                     foreach (SimpleEnemy e in _SimpleEnemies)
                     {
-                        e.EnemyMovement();
+                        _positionSEnemies = e.EnemyMovement(_positionSEnemies);
                         e.Update();
                     }
                 });
@@ -184,7 +209,7 @@ namespace alien_invasion
                 {
                     foreach (MediumEnemy e in _MediumEnemies)
                     {
-                        e.EnemyMovement();
+                       _positionMEnmies = e.EnemyMovement(_positionMEnmies);
                         e.Update();
                     }
                 });
@@ -192,7 +217,7 @@ namespace alien_invasion
                 {
                     foreach (QueenEnemy e in _QueenEnemies)
                     {
-                        e.EnemyMovement();
+                       _positionQEnmies = e.EnemyMovement(_positionQEnmies);
                         e.Update();
                     }
                 });

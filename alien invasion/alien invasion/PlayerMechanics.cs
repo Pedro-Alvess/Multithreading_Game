@@ -20,10 +20,12 @@ namespace alien_invasion
         private object _locker = new { };
         public event EventHandler<BulletEventArgs<PlayerBullet>> bulletCreated;
         private List<PlayerBullet> _bullets = new List<PlayerBullet>();
+        private List<PlayerBullet> _bufferBullets = new List<PlayerBullet>();
 
-        private int _speed = 5;
+        private int _speed = 7;
         private bool _leftBoundary = false;
         private bool _rightBoundary = false;
+
         
         private static string _assetPath = Fase_1.AssetPath;
 
@@ -82,38 +84,40 @@ namespace alien_invasion
         public void ShootRight()
         {
             PlayerBullet bullet = new PlayerBullet(_player.Left + (_player.Width / 2) - 31, _player.Top);
-            _bullets.Add(bullet);
+            _bufferBullets.Add(bullet);
             bulletCreated?.Invoke(this, new BulletEventArgs<PlayerBullet>(bullet));
         }
         public void ShootLeft()
         {
             PlayerBullet bullet = new PlayerBullet(_player.Left + (_player.Width / 2) + 31, _player.Top);
-            _bullets.Add(bullet);
+            _bufferBullets.Add(bullet);
             bulletCreated?.Invoke(this, new BulletEventArgs<PlayerBullet>(bullet));
         }
         public void Update()
         {
             lock (_locker) // Inicio do bloco de sincronização
             {
-                for (int i = 0; i < _bullets.Count(); i++)
+                _bullets.AddRange(_bufferBullets);
+                _bufferBullets.Clear();
+            }
+            for (int i = 0; i < _bullets.Count(); i++)
+            {
+                _bullets[i].Move();
+            }
+            _bullets.RemoveAll(b =>
+            {
+                bool isOutOfBounds = b.IsOutOfBounds();
+                if (isOutOfBounds)
                 {
-                    _bullets[i].Move();
-                }
-                _bullets.RemoveAll(b =>
-                {
-                    bool isOutOfBounds = b.IsOutOfBounds();
-                    if (isOutOfBounds)
+                    // Remover o objeto da interface do usuário
+                    Fase_1.ActiveForm.Invoke((MethodInvoker)(() =>
                     {
-                        // Remover o objeto da interface do usuário
-                        Fase_1.ActiveForm.Invoke((MethodInvoker)(() =>
-                        {
-                            Fase_1.ActiveForm.Controls.Remove(b.GetPictureBox());
-                            b.GetPictureBox().Dispose();
-                        }));
-                    }
-                    return isOutOfBounds;
-                });
-            }// Fim do bloco de sincronização
+                        Fase_1.ActiveForm.Controls.Remove(b.GetPictureBox());
+                        b.GetPictureBox().Dispose();
+                    }));
+                }
+                return isOutOfBounds;
+            });
         }
     }
 }

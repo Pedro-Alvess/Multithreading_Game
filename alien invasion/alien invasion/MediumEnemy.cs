@@ -23,7 +23,11 @@ namespace alien_invasion
         private List<MediumEnemyBullet> _bullets = new List<MediumEnemyBullet>();
 
         private bool _isMovingRight;
-        private int _speed = 8;
+        private int _speed = 10;
+        private int _X;
+        private int _Y;
+        private int _offset = 40;
+        private bool _boundary;
 
         public MediumEnemy(object sender, EventArgs e, Point position)
         {
@@ -46,27 +50,42 @@ namespace alien_invasion
                 _enemy.BringToFront();
             }));
         }
-        public void EnemyMovement()
+        public List<Point> EnemyMovement(List<Point> positions)
         {
-           if (_enemy.Left + _speed >= 750)
+            _boundary = false;
+            _Y = _enemy.Location.Y;
+            _X = _enemy.Location.X;
+
+            bool goRight = positions.Contains(new Point(_X + _speed + _offset, _Y));
+            bool goLeft = positions.Contains(new Point(_X - _speed - _offset, _Y));
+
+            positions.Remove(_enemy.Location);
+
+            if (_enemy.Left + _speed >= 750)
             {
                 _isMovingRight = !_isMovingRight;
+                _boundary = true;
             }
             else if (_enemy.Left - _speed <= 0)
             {
                 _isMovingRight = !_isMovingRight;
+                _boundary = true;
             }
-            else if (random.Next(0, 100) < 1) // 5% de chance dele inverter o movimento
+            else if (random.Next(0, 100) < 10) // 10% de chance dele inverter o movimento
+            {
+                _isMovingRight = !_isMovingRight;
+            }
+            else if (!_boundary && goRight || goLeft) // Evita que os inimigos se interpolem
             {
                 _isMovingRight = !_isMovingRight;
             }
 
             //Como os asstes estão na thread principal, só é possivel atualizar a possição na thread form.
-            if (_isMovingRight)
+            if (_isMovingRight && !goRight)
             {
                 _enemy.Invoke((MethodInvoker)(() => _enemy.Left += _speed));
             }
-            else
+            else if (!_isMovingRight && !goLeft)
             {
                 _enemy.Invoke((MethodInvoker)(() => _enemy.Left -= _speed));
             }
@@ -81,6 +100,8 @@ namespace alien_invasion
                 _bulletCreated?.Invoke(this, new BulletEventArgs<MediumEnemyBullet>(bullet));
             }
 
+            positions.Add(_enemy.Location);
+            return positions;
         }
         public void Update()
         {

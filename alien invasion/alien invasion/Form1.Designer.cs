@@ -63,6 +63,7 @@
             this.ClientSize = new System.Drawing.Size(784, 561);
             this.Controls.Add(this.pictureBox6);
             this.Controls.Add(this.label1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "Fase_1";
