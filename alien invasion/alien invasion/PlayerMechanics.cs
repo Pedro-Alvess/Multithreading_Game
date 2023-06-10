@@ -19,7 +19,7 @@ namespace alien_invasion
 
         private object _locker = new { };
         public event EventHandler<BulletEventArgs<PlayerBullet>> bulletCreated;
-        private List<PlayerBullet> _bullets = new List<PlayerBullet>();
+        public static List<PlayerBullet> bullets = new List<PlayerBullet>();
         private List<PlayerBullet> _bufferBullets = new List<PlayerBullet>();
 
         private int _speed = 7;
@@ -97,14 +97,14 @@ namespace alien_invasion
         {
             lock (_locker) // Inicio do bloco de sincronização
             {
-                _bullets.AddRange(_bufferBullets);
+                bullets.AddRange(_bufferBullets);
                 _bufferBullets.Clear();
             }
-            for (int i = 0; i < _bullets.Count(); i++)
+            for (int i = 0; i < bullets.Count(); i++)
             {
-                _bullets[i].Move();
+                bullets[i].Move();
             }
-            _bullets.RemoveAll(b =>
+            bullets.RemoveAll(b =>
             {
                 bool isOutOfBounds = b.IsOutOfBounds();
                 if (isOutOfBounds)

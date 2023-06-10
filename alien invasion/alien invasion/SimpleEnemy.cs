@@ -15,7 +15,7 @@ namespace alien_invasion
         private static string _assetPath = Fase_1.AssetPath;
 
         private PictureBox _enemy;
-        private double _life;
+        private int _life = 3;
         private bool _dead = false;
         private static Random random = new Random();
 
@@ -30,6 +30,14 @@ namespace alien_invasion
         private int _offset = 30;
         private bool _boundary;
 
+        public bool isDead
+        {
+            get { return _dead; }
+        }
+        public bool noBullets
+        {
+            get { return _bullets.Any(); }
+        }
         public SimpleEnemy(object sender, EventArgs e, Point position)
         {
             Fase_1 form = (Fase_1)sender;
@@ -59,51 +67,99 @@ namespace alien_invasion
 
             positions.Remove(_enemy.Location);
 
+            CollisionBulletDetection(positions);
 
-            bool goRight = positions.Contains(new Point(_X + _speed + _offset, _Y));
-            bool goLeft = positions.Contains(new Point(_X - _speed - _offset, _Y));
+            if(!(_enemy.IsDisposed || _enemy == null)) // Verifica se o inimigo ainda existe
+            {
+                bool goRight = positions.Contains(new Point(_X + _speed + _offset, _Y));
+                bool goLeft = positions.Contains(new Point(_X - _speed - _offset, _Y));
 
-            if (_enemy.Left + _speed >= 750)
-            {
-                _isMovingRight = !_isMovingRight;
-                _boundary = true;
-            }
-            else if (_enemy.Left - _speed <= 0)
-            {
-                _isMovingRight = !_isMovingRight;
-                _boundary = true;
-            }
-            else if (random.Next(0, 100) < 14) // 14% de chance dele inverter o movimento
-            { 
-                _isMovingRight = !_isMovingRight; 
-            }
-            else if(!_boundary && goRight || goLeft)// Evita que os inimigos se interpolem
-            {
-                _isMovingRight = !_isMovingRight;
-            }
+                if (_enemy.Left + _speed >= 750)
+                {
+                    _isMovingRight = !_isMovingRight;
+                    _boundary = true;
+                }
+                else if (_enemy.Left - _speed <= 0)
+                {
+                    _isMovingRight = !_isMovingRight;
+                    _boundary = true;
+                }
+                else if (random.Next(0, 100) < 14) // 14% de chance dele inverter o movimento
+                {
+                    _isMovingRight = !_isMovingRight;
+                }
+                else if (!_boundary && goRight || goLeft)// Evita que os inimigos se interpolem
+                {
+                    _isMovingRight = !_isMovingRight;
+                }
 
-            //Como os asstes estão na thread principal, só é possivel atualizar a possição na thread form.
-            if (_isMovingRight && !goRight)
-            {
-                _enemy.Invoke((MethodInvoker)(() => _enemy.Left += _speed));
-            }
-            else if(!_isMovingRight && !goLeft)
-            {
-                _enemy.Invoke((MethodInvoker)(() => _enemy.Left -= _speed));
-            }
+                //Como os asstes estão na thread principal, só é possivel atualizar a possição na thread form.
+                if (_isMovingRight && !goRight)
+                {
+                    _enemy.Invoke((MethodInvoker)(() => _enemy.Left += _speed));
+                }
+                else if (!_isMovingRight && !goLeft)
+                {
+                    _enemy.Invoke((MethodInvoker)(() => _enemy.Left -= _speed));
+                }
 
+
+
+                //Tiro aleatório para baixo
+                if (random.Next(0, 100) < 2) //2% de chance de atirar
+                {
+                    SimpleEnemyBullet bullet = new SimpleEnemyBullet(_enemy.Left + (_enemy.Width / 2), _enemy.Top + _enemy.Height);
+                    _bullets.Add(bullet);
+                    _bulletCreated?.Invoke(this, new BulletEventArgs<SimpleEnemyBullet>(bullet));
+                }
+                positions.Add(_enemy.Location);
+            }
             
-
-            //Tiro aleatório para baixo
-            if (random.Next(0, 100) < 2) //2% de chance de atirar
-            {
-                SimpleEnemyBullet bullet = new SimpleEnemyBullet(_enemy.Left + (_enemy.Width / 2), _enemy.Top + _enemy.Height);
-                _bullets.Add(bullet);
-                _bulletCreated?.Invoke(this, new BulletEventArgs<SimpleEnemyBullet>(bullet));
-            }
-
-            positions.Add(_enemy.Location);
             return positions;
+        }
+
+        private void CollisionBulletDetection(List<Point> position)
+        {
+            List<PlayerBullet> playerBullets = PlayerMechanics.bullets;
+
+            for (int i = playerBullets.Count - 1; i >= 0; i--)
+            {
+                PlayerBullet b = playerBullets[i];
+
+                if (b.GetPictureBox().Bounds.IntersectsWith(_enemy.Bounds))
+                {
+                    new MiniExplosion(b.GetPictureBox().Location);
+
+                    lock (_locker)
+                    {
+                        PlayerMechanics.bullets.Remove(b);
+                    }
+
+                    Fase_1.ActiveForm.Invoke((MethodInvoker)(() =>
+                    {
+                        Fase_1.ActiveForm.Controls.Remove(b.GetPictureBox());
+                        b.GetPictureBox().Dispose();
+                    }));
+
+                    _life--;
+                    if(_life <= 0)
+                    {
+                        _dead = true;
+                        _DestroyEnemy();                         
+                        return;
+                    }
+                }
+            }
+        }
+        private void _DestroyEnemy()
+        {
+            new Explosion(_enemy.Location);
+
+            Fase_1.ActiveForm.Invoke((MethodInvoker)(() =>
+            {
+                Fase_1.ActiveForm.Controls.Remove(_enemy);
+                _enemy.Dispose();
+            }));
         }
         public void Update()
         {

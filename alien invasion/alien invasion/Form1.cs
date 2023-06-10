@@ -24,13 +24,21 @@ namespace alien_invasion
         private bool _shootSide = false;
         private int _timeBetweenShot = 450;
 
+        private object _lock = new object();
+
         private List<SimpleEnemy> _SimpleEnemies = new List<SimpleEnemy>();
+        private List<SimpleEnemy> _BufferSEnmies = new List<SimpleEnemy>();
+        private List<SimpleEnemy> _BulletSEnmiesDead = new List<SimpleEnemy>();
         private List<Point> _positionSEnemies = new List<Point>();
 
         private List<MediumEnemy> _MediumEnemies = new List<MediumEnemy>();
+        private List<MediumEnemy> _BufferMEnmies = new List<MediumEnemy>();
+        private List<MediumEnemy> _BulletMEnmiesDead = new List<MediumEnemy>();
         private List<Point> _positionMEnmies = new List<Point>();
 
         private List<QueenEnemy> _QueenEnemies = new List<QueenEnemy>();
+        private List<QueenEnemy> _BufferQEnmies = new List<QueenEnemy>();
+        private List<QueenEnemy> _BulletQEnmiesDead = new List<QueenEnemy>();
         private List<Point> _positionQEnmies = new List<Point>();
 
         public Fase_1()
@@ -195,7 +203,6 @@ namespace alien_invasion
         {
             while (!gameOver)
             {
-                Task.Delay(100).Wait();
                 Task.Run( () =>
                 {
                     foreach (SimpleEnemy e in _SimpleEnemies)
@@ -203,6 +210,8 @@ namespace alien_invasion
                         _positionSEnemies = e.EnemyMovement(_positionSEnemies);
                         e.Update();
                     }
+                    _BufferSEnmies.AddRange(_SimpleEnemies.Where(e => e.noBullets && e.isDead));
+                    _SimpleEnemies.RemoveAll(enemy => enemy.isDead);
                 });
                 Task.Delay(25).Wait();
                 Task.Run(() =>
@@ -212,6 +221,8 @@ namespace alien_invasion
                        _positionMEnmies = e.EnemyMovement(_positionMEnmies);
                         e.Update();
                     }
+                    _BufferMEnmies.AddRange(_MediumEnemies.Where(e => e.noBullets && e.isDead));
+                    _MediumEnemies.RemoveAll(enemy => enemy.isDead);
                 });
                 Task.Run(() =>
                 {
@@ -220,6 +231,50 @@ namespace alien_invasion
                        _positionQEnmies = e.EnemyMovement(_positionQEnmies);
                         e.Update();
                     }
+                    _BufferQEnmies.AddRange(_QueenEnemies.Where(e => e.noBullets && e.isDead));
+                    _QueenEnemies.RemoveAll(enemy => enemy.isDead);
+                });
+
+                Task.Delay(100).Wait();
+
+                Task.Run(() =>
+                {
+                    lock (_lock)
+                    {
+                        _BulletSEnmiesDead.AddRange(_BufferSEnmies);
+                        _BufferSEnmies.Clear();
+                    }
+                    foreach (SimpleEnemy e in _BulletSEnmiesDead)
+                    {
+                        e.Update();
+                    }
+                    _BulletSEnmiesDead.RemoveAll(enemy => !enemy.noBullets);
+                });
+                Task.Run(() =>
+                {
+                    lock (_lock)
+                    {
+                        _BulletMEnmiesDead.AddRange(_BufferMEnmies);
+                        _BufferMEnmies.Clear();
+                    }
+                    foreach (MediumEnemy e in _BulletMEnmiesDead)
+                    {
+                        e.Update();
+                    }
+                    _BulletMEnmiesDead.RemoveAll(enemy => !enemy.noBullets);
+                });
+                Task.Run(() =>
+                {
+                    lock (_lock)
+                    {
+                        _BulletQEnmiesDead.AddRange(_BufferQEnmies);
+                        _BufferQEnmies.Clear();
+                    }
+                    foreach (QueenEnemy e in _BulletQEnmiesDead)
+                    {
+                        e.Update();
+                    }
+                    _BulletQEnmiesDead.RemoveAll(enemy => !enemy.noBullets);
                 });
             }
         }

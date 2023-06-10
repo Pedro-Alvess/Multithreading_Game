@@ -47,8 +47,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bullet.cs" />
+    <Compile Include="Explosion.cs" />
     <Compile Include="MediumEnemy.cs" />
     <Compile Include="MediumEnemyBullet.cs" />
+    <Compile Include="MiniExplosion.cs" />
     <Compile Include="PlayerBullet.cs" />
     <Compile Include="BulletEventArgs.cs" />
     <Compile Include="CheckFiles.cs" />

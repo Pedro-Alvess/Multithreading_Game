@@ -6,26 +6,24 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static System.Windows.Forms.AxHost;
 
 namespace alien_invasion
 {
-    internal abstract class Bullet
+    internal class Explosion
     {
         private static string _assetsPath = Fase_1.AssetPath;
-        public abstract void Move();
-        public abstract bool IsOutOfBounds();
+        private int _disappearTime = 350;
 
-        public PictureBox creatBullet(int width, int height, string assetsName, int startX, int startY)
+        public Explosion(Point position) 
         {
             PictureBox obj = new PictureBox();
-            obj.Width = width;
-            obj.Height = height;
-            obj.Image = Image.FromFile(Path.Combine(_assetsPath, assetsName));
+            obj.Width = 55;
+            obj.Height = 50;
+            obj.Image = Image.FromFile(Path.Combine(_assetsPath, "explosion.png"));
             obj.SizeMode = PictureBoxSizeMode.CenterImage;
             obj.BackColor = Color.Transparent;
-            obj.Left = startX;
-            obj.Top = startY;
+            obj.Left = position.X;
+            obj.Top = position.Y;
 
 
             Fase_1.ActiveForm.Invoke((MethodInvoker)(() =>
@@ -34,8 +32,14 @@ namespace alien_invasion
                 obj.BringToFront();
             }));
 
-
-            return obj;
+            Task.Delay(_disappearTime).ContinueWith(_ => DeleteObj(obj));
+        }
+        private void DeleteObj(PictureBox obj)
+        {
+            Fase_1.ActiveForm.Invoke((MethodInvoker)(() =>
+            {
+                Fase_1.ActiveForm.Controls.Remove(obj);
+            }));
         }
     }
 }

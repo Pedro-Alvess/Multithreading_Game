@@ -19,17 +19,24 @@ namespace alien_invasion
             //Chama o metodo da classe abstrata para criar a bullet
             _bullet = base.creatBullet(15,16,"Bullet.png",startX - 16/2,startY);
         }
-
         public override void Move()
         {
-            if (_bullet.InvokeRequired)
+            if (_bullet.IsDisposed || _bullet == null)
             {
-                _bullet.Invoke(new MethodInvoker(Move));
+                return; // Abortar a execução se o objeto já foi descartado
             }
-            else
+            try
             {
-                _bullet.Top -= _speed;
+                if (_bullet.InvokeRequired && !_bullet.IsDisposed)
+                {
+                    _bullet.Invoke(new MethodInvoker(Move));
+                }
+                else
+                {
+                    _bullet.Top -= _speed;
+                }
             }
+            catch (ObjectDisposedException){ } // Ignora se ele tentar mover um objeto que não existe.
         }
 
         public override bool IsOutOfBounds()
