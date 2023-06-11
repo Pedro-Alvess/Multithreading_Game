@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -21,6 +22,8 @@ namespace alien_invasion
         private object _locker = new { };
         private EventHandler<BulletEventArgs<QueenEnemyBullet>> _bulletCreated;
         private List<QueenEnemyBullet> _bullets = new List<QueenEnemyBullet>();
+        private Stopwatch stopwatch = new Stopwatch();
+        private int _timeBetweenShot = 1000;
 
         private bool _isMovingRight;
         private int _speed = 5;
@@ -28,6 +31,8 @@ namespace alien_invasion
         private int _Y;
         private int _offset = 55;
         private bool _boundary;
+
+        private int _shotPerc = 1;
 
         public bool isDead
         {
@@ -102,9 +107,24 @@ namespace alien_invasion
                     _enemy.Invoke((MethodInvoker)(() => _enemy.Left -= _speed));
                 }
 
-                //Tiro aleatório para baixo
-                if (random.Next(0, 100) < 1) //5% de chance de atirar
+                if (PlayerMechanics.Score >= 1000)
                 {
+                    _shotPerc = 13;
+                }
+                else if (PlayerMechanics.Score >= 750)
+                {
+                    _shotPerc = 5;
+                }
+                else if (PlayerMechanics.Score >= 500)
+                {
+                    _shotPerc = 3;
+                }
+
+                //Tiro aleatório para baixo
+                if (random.Next(0, 100) < _shotPerc && (stopwatch.ElapsedMilliseconds >= _timeBetweenShot || !stopwatch.IsRunning)) //Chance de atirar
+                {
+                    stopwatch.Restart();
+                    stopwatch.Start();
                     QueenEnemyBullet bullet = new QueenEnemyBullet(_enemy.Left + (_enemy.Width / 2), _enemy.Top + _enemy.Height);
                     _bullets.Add(bullet);
                     _bulletCreated?.Invoke(this, new BulletEventArgs<QueenEnemyBullet>(bullet));
@@ -152,6 +172,7 @@ namespace alien_invasion
         private void _DestroyEnemy()
         {
             new Explosion(_enemy.Location);
+            PlayerMechanics.Score += 150;
 
             Fase_1.ActiveForm.Invoke((MethodInvoker)(() =>
             {
@@ -182,6 +203,25 @@ namespace alien_invasion
                     }
                     return isOutOfBounds;
                 }); // Usa uma função Lambda para remover as bullets
+            }
+        }
+        public List<QueenEnemyBullet> GetBulletList()
+        {
+            return new List<QueenEnemyBullet>(_bullets);
+        }
+        public void RemoveBullet(QueenEnemyBullet bullet)
+        {
+            PlayerMechanics.Shild -= 35;
+
+            QueenEnemyBullet bulletToRemove = _bullets.Find(b => b == bullet);
+            if (bulletToRemove != null)
+            {
+                _bullets.Remove(bulletToRemove);
+                Fase_1.ActiveForm.Invoke((MethodInvoker)(() =>
+                {
+                    Fase_1.ActiveForm.Controls.Remove(bulletToRemove.GetPictureBox());
+                    bulletToRemove.GetPictureBox().Dispose();
+                }));
             }
         }
 

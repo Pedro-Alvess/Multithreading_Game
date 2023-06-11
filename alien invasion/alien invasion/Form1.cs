@@ -41,12 +41,23 @@ namespace alien_invasion
         private List<QueenEnemy> _BulletQEnmiesDead = new List<QueenEnemy>();
         private List<Point> _positionQEnmies = new List<Point>();
 
+        public static Label LblScore;
+        public static Label LblShild;
+        private static Label _LblGameOver;
+        private static Label _LblWin;
+        private static PictureBox _pbTrophy;
+
         public Fase_1()
         {
             //Verifica a integridade dos arquivos;
             AssetPath = new CheckFiles().CheckAssets();
 
             InitializeComponent();
+            LblScore = this.score;
+            LblShild = this.shield;
+            _LblGameOver = this.lblGameOver;
+            _LblWin = this.lblwin;
+            _pbTrophy = this.pbTrohpy;
             //this.TransparencyKey = Color.MidnightBlue;
             _player = new PlayerMechanics();
 
@@ -83,7 +94,7 @@ namespace alien_invasion
                 {
                     _player.Update();
 
-                    gameOver = _player.alive;
+                    gameOver = !_player.alive;
                     Thread.Sleep(16);
                 }
             });
@@ -92,7 +103,7 @@ namespace alien_invasion
             {
                 while (!gameOver)
                 {
-                    gameOver = _player.alive;
+                    gameOver = !_player.alive;
                     MovePlayer();
                     Thread.Sleep(16);
                 }
@@ -203,6 +214,7 @@ namespace alien_invasion
         {
             while (!gameOver)
             {
+                //Threads para atualiza a posição do inimigo e as balas
                 Task.Run( () =>
                 {
                     foreach (SimpleEnemy e in _SimpleEnemies)
@@ -237,6 +249,7 @@ namespace alien_invasion
 
                 Task.Delay(100).Wait();
 
+                //Threads que movimenta balas de inimigos destruidos.
                 Task.Run(() =>
                 {
                     lock (_lock)
@@ -276,7 +289,69 @@ namespace alien_invasion
                     }
                     _BulletQEnmiesDead.RemoveAll(enemy => !enemy.noBullets);
                 });
+                //Threads para verificar a colisão do player com as balas inimigas;
+                Task.Run(() =>
+                {
+                    _player.CollisionBulletDetection<SimpleEnemy, SimpleEnemyBullet>(
+                                    _SimpleEnemies,
+                                    _BufferSEnmies,
+                                    enemy => enemy.GetBulletList(),
+                                    (enemy, bullet) => enemy.RemoveBullet(bullet)
+                    );
+
+                });
+                Task.Run(() =>
+                {
+                    _player.CollisionBulletDetection<MediumEnemy, MediumEnemyBullet>(
+                                    _MediumEnemies,
+                                    _BufferMEnmies,
+                                    enemy => enemy.GetBulletList(),
+                                    (enemy, bullet) => enemy.RemoveBullet(bullet)
+                    );
+
+                });
+                Task.Run(() =>
+                {
+                    _player.CollisionBulletDetection<QueenEnemy, QueenEnemyBullet>(
+                                    _QueenEnemies,
+                                    _BufferQEnmies,
+                                    enemy => enemy.GetBulletList(),
+                                    (enemy, bullet) => enemy.RemoveBullet(bullet)
+                    );
+
+                });
+
             }
+        }
+
+        public static void GameOver()
+        {
+            if (_LblGameOver.InvokeRequired)
+            {
+                //Chama a thread de UI;
+                _LblGameOver.Invoke(new MethodInvoker(Win));
+            }
+            else
+            {
+                _LblGameOver.Visible = true;
+                _LblGameOver.BringToFront();
+            }
+        }
+        public static void Win()
+        {
+            if (_LblWin.InvokeRequired)
+            {
+                //Chama a thread de UI;
+                _LblWin.Invoke(new MethodInvoker(Win));
+            }
+            else
+            {
+                _LblWin.Visible = true;
+                _LblWin.BringToFront();
+                _pbTrophy.Visible = true;
+                _pbTrophy.BringToFront();
+            }
+
         }
     }
 }

@@ -15,7 +15,13 @@ namespace alien_invasion
     {
         private PictureBox _player;
         private double _live;
-        public bool alive = false;
+        public bool alive = true;
+
+        public static int Score = 0;
+        private int _lastScore = 0;
+
+        public static int Shild = 100;
+        private int _lastShild = 100;
 
         private object _locker = new { };
         public event EventHandler<BulletEventArgs<PlayerBullet>> bulletCreated;
@@ -93,8 +99,62 @@ namespace alien_invasion
             _bufferBullets.Add(bullet);
             bulletCreated?.Invoke(this, new BulletEventArgs<PlayerBullet>(bullet));
         }
+
+        public void CollisionBulletDetection<TEnemy, TBullet>(List<TEnemy> bullets, List<TEnemy> deadBullets, Func<TEnemy, List<TBullet>> getBulletList, Action<TEnemy, TBullet> removeBullet)
+        {
+            List<TEnemy> allBullets = new List<TEnemy>();
+            allBullets.AddRange(bullets);
+            allBullets.AddRange(deadBullets);
+
+            for(int i = allBullets.Count - 1; i >= 0; i--)
+            {
+                List<TBullet> bulletList = getBulletList(allBullets[i]);
+
+                for (int c = bulletList.Count - 1; c>= 0; c--)
+                {
+                    TBullet bullet = bulletList[c]; ;
+
+                    if (((dynamic)bullet).GetPictureBox().Bounds.IntersectsWith(_player.Bounds))
+                    {
+                        new MiniExplosion(((dynamic)bullet).GetPictureBox().Location);
+
+                        removeBullet(allBullets[i], bullet);
+                    }
+                }
+                
+            }
+        }
+
         public void Update()
         {
+            if(_lastScore != Score)
+            {
+                _lastScore= Score;
+                Fase_1.ActiveForm.Invoke((MethodInvoker)(() => { Fase_1.LblScore.Text = Score.ToString(); }));
+
+                if(Score > 1405)
+                {
+                    Fase_1.Win();
+                }
+            }
+            if(_lastShild != Shild)
+            {
+                _lastShild = Shild;
+
+                if (Shild <= 0)
+                {
+                    _DestroyPlayer();
+                    Shild = 0;
+                }
+
+                Fase_1.ActiveForm.Invoke((MethodInvoker)(() => { Fase_1.LblShild.Text = ((double)Shild/100).ToString("00%"); }));
+
+                if(Shild <= 0)
+                {
+                    _DestroyPlayer();
+                }
+            }          
+           
             lock (_locker) // Inicio do bloco de sincronização
             {
                 bullets.AddRange(_bufferBullets);
@@ -118,6 +178,20 @@ namespace alien_invasion
                 }
                 return isOutOfBounds;
             });
+        }
+
+        private void _DestroyPlayer()
+        {
+            new Explosion(_player.Location,500);
+            alive = false;
+
+            Fase_1.ActiveForm.Invoke((MethodInvoker)(() =>
+            {
+                Fase_1.ActiveForm.Controls.Remove(_player);
+                _player.Dispose();
+                Fase_1.GameOver();
+            }));
+
         }
     }
 }

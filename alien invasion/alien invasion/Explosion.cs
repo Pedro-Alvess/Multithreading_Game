@@ -14,8 +14,9 @@ namespace alien_invasion
         private static string _assetsPath = Fase_1.AssetPath;
         private int _disappearTime = 350;
 
-        public Explosion(Point position) 
+        public Explosion(Point position, int disappearTime = 350) 
         {
+            _disappearTime = disappearTime;
             PictureBox obj = new PictureBox();
             obj.Width = 55;
             obj.Height = 50;
