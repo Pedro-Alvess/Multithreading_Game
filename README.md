@@ -19,6 +19,8 @@ Alien Invasion é um jogo de tiro desenvolvido em C# utilizando o Windows Forms.
 ## 📄 Pré-requisitos
 
 - Microsoft .NET Framework 4.7.2 ou superior.
+- Processador Core i3 8th igual ou superior.
+- 8 memoria RAM.
 
 ## 🕹 Como Jogar
 ![Screenshot](https://github.com/Pedro-Alvess/Multithreading_Game/blob/main/alien%20invasion/alien%20invasion/Assets/trophy.png)
